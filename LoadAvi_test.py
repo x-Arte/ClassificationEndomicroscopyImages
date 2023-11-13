@@ -17,7 +17,7 @@ inputFile = 'Menngioma.mpg'
 cap = cv2.VideoCapture(inputFile)
 #Define the first and final image frame number
 startImage = 1
-endImage = 1000
+endImage = 100
 
 # Read the first frame
 ret, backgroundImage = cap.read()
@@ -40,7 +40,7 @@ for i in range(2, nImages+1):
     #currentImage = currentImage + 159
     cv2.imshow('Current Image', currentImage)
     print(i)
-    #cv2.waitKey()
+    cv2.waitKey()
 # relesase the vido
 cap.release()
 cv2.waitKey()

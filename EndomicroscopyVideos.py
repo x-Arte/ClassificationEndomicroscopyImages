@@ -42,18 +42,19 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
             eimg = EndomicroscopyImage(filename[:filename.rfind('.')],i,label,currentImage)
             eimg.save(outputpath)
             print(i)
-            # cv2.waitKey()
+            #cv2.waitKey()
         # relesase the vido
         cap.release()
 
     return cnt
 
 if __name__ == "__main__":
-    dicname = "dataset/meningioma/"
-    radius_value = 150
+    dicname = "dataset/GBM_train/"
+    radius_value = 100
     hsize_value = 1
-    sigma_value = 1.2
-    outputpath = 'dataset/images/'
-    cnt = load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath)
+    sigma_value = 10
+    outputpath = 'dataset/images/train/'
+    end_image = 100
+    cnt = load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,1,end_image)
     print(cnt)
 

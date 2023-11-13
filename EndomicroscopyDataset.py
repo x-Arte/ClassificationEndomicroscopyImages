@@ -52,14 +52,14 @@ def save_dataset(dataset, file_path):
     torch.save(dataset, file_path)
 
 if __name__ == "__main__":
-    root_dic = 'dataset/images/'
+    root_dic = 'dataset/images/train/'
     save_dic = 'dataset/'
-    train_size = 0.8
+    train_size = 1
     train_dataset, test_dataset = load_and_randomsplit_dataset(root_dic, train_size)
     print("train_dataset size:"+str(train_dataset.__len__()))
     print("test_dataset size:" + str(test_dataset.__len__()))
-    save_dataset(train_dataset,save_dic+'train.dat')
-    save_dataset(test_dataset,save_dic+'test.dat')
+    save_dataset(train_dataset,save_dic+'train1.dat')
+    save_dataset(test_dataset,save_dic+'test1.dat')
 
 
 
