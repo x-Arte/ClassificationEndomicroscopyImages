@@ -15,9 +15,9 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
         cnt+=1
         label = -1 #-1:none 0:GBM 1:meningioma etc.
         if filename.startswith('GBM'):
-            label = 1
+            label = 0
         elif filename.startswith('meningioma'):
-            label = 2
+            label = 1
         cap = cv2.VideoCapture(dicname+filename)
         # Define the first and final image frame number
 
@@ -49,11 +49,11 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
     return cnt
 
 if __name__ == "__main__":
-    dicname = "dataset/GBM_train/"
+    dicname = "dataset/GBM_test/"
     radius_value = 100
     hsize_value = 1
     sigma_value = 10
-    outputpath = 'dataset/images/train/'
+    outputpath = 'dataset/images/test/'
     end_image = 100
     cnt = load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,1,end_image)
     print(cnt)
