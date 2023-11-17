@@ -43,7 +43,7 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
         print('yes gpu')
     else:
         print('no cpu')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available()  else 'cpu')
     model = model.to(device)
     model.train()
 
@@ -78,7 +78,7 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
 if __name__ == '__main__':
     num_classes = 2  # Update based on the number of classes in your dataset
     learning_rate = 0.001
-    batch_size = 8
+    batch_size = 16
     epochs = 25
 
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/images/train')

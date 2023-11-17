@@ -53,7 +53,7 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
     return cnt
 
 if __name__ == "__main__":
-    dicname = "dataset/meningioma_test/"
+    dicname = "dataset/GBM_test/"
     radius_value = 175
     hsize_value = 1
     sigma_value = 10
