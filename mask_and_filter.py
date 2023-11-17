@@ -4,19 +4,25 @@ import matplotlib.pyplot as plt
 
 
 def mask_and_filter(previousImage, radius, hsize, sigma, type = 'r'):
-    imageSize = previousImage.shape
-    ci = (imageSize[0] // 2, imageSize[1] // 2, radius)
-    print(ci,imageSize)
-    # define the mask
-    xx, yy = np.meshgrid(np.arange(imageSize[1]) - ci[0], np.arange(imageSize[0]) - ci[1])
-    if(type == 'r'):
+    if (type == 'r'):
+        imageSize = previousImage.shape
+        ci = (imageSize[1] // 2, imageSize[0] // 2, radius)
+        # define the mask
+        xx, yy = np.meshgrid(np.arange(imageSize[1]) - ci[0], np.arange(imageSize[0]) - ci[1])
+        mask = ((xx ** 2 + yy ** 2) < ci[2] ** 2).astype(np.uint8)
+        masklogical = mask.astype(bool)
+
+        #mask = np.zeros(imageSize, dtype=np.uint8)
         mask = ((xx ** 2 + yy ** 2) < ci[2] ** 2).astype(np.uint8)
     elif(type == 'rec'):
+        imageSize = previousImage.shape
+        ci = (imageSize[0] // 2, imageSize[1] // 2, radius)
+        print(ci,imageSize)
+        # define the mask
+        xx, yy = np.meshgrid(np.arange(imageSize[0]) - ci[0], np.arange(imageSize[1]) - ci[1])
         mask = np.zeros(imageSize, dtype=np.uint8)
         mask[ci[0]-radius:ci[0]+radius, ci[1]-radius:ci[1]+radius] = 1
-
-            #mask = (((xx-ci[1])**2<ci[2]**2)&((yy-ci[0])**2<ci[2]**2)).all().astype(np.uint8)
-    masklogical = mask.astype(bool)
+        masklogical = mask.astype(bool)
 
     #crop the image
     croppedImage = np.zeros_like(masklogical, dtype=previousImage.dtype)

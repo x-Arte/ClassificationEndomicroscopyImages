@@ -36,7 +36,11 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
             ret, currentImage = cap.read()
             currentImage = cv2.cvtColor(currentImage, cv2.COLOR_BGR2GRAY)
             # Use the function mask_and_filter
-            currentImage = mask_and_filter(currentImage, radius_value,hsize_value,sigma_value, 'rec')
+
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!change 'r'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            currentImage = mask_and_filter(currentImage, radius_value,hsize_value,sigma_value, 'r')
+            # !!!!!!!!!!!!!!!!!!!!!!!!!!!!change 'r'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
             # currentImage = currentImage + 159
             cv2.imshow('Current Image', currentImage)
             eimg = EndomicroscopyImage(filename[:filename.rfind('.')],i,label,currentImage)
@@ -49,8 +53,8 @@ def load_dic(dicname,radius_value,hsize_value,sigma_value,outputpath,startImage 
     return cnt
 
 if __name__ == "__main__":
-    dicname = "dataset/GBM_test/"
-    radius_value = 100
+    dicname = "dataset/meningioma_test/"
+    radius_value = 175
     hsize_value = 1
     sigma_value = 10
     outputpath = 'dataset/images/test/'

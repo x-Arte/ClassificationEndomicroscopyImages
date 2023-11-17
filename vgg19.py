@@ -42,7 +42,7 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
     if torch.cuda.is_available():
         print('yes gpu')
     else:
-        print('oh god cpu')
+        print('no cpu')
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     model.train()

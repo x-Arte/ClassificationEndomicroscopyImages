@@ -36,7 +36,7 @@ for i in range(2, nImages+1):
     ret, currentImage = cap.read()
     currentImage = cv2.cvtColor(currentImage, cv2.COLOR_BGR2GRAY)
     # Use the function mask_and_filter
-    currentImage = mask_and_filter(currentImage,100,1,10,'rec')
+    currentImage = mask_and_filter(currentImage,175,1,10,'r')
     #currentImage = currentImage + 159
     cv2.imshow('Current Image', currentImage)
     print(i)
