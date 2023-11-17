@@ -1,46 +1,55 @@
-import torch.nn as nn
-from torchvision import models
 import torch
-from torch import optim, nn
-from torchvision.datasets import ImageFolder
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+import torch.nn as nn
+import torch.optim as optim
 from torch.utils.data import DataLoader
 import time
 import EndomicroscopyDataset
-from EndomicroscopyImage import EndomicroscopyImage
 
-def get_vgg19_model(pretrained=True, num_classes=2):
-    vgg19 = models.vgg19(pretrained=pretrained)
-    vgg19.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
-    # Replace the classifier to match the number of classes
-    vgg19.classifier[6] = nn.Linear(vgg19.classifier[6].in_features, num_classes)
-    return vgg19
+class VGG19(nn.Module):
+    def __init__(self, num_classes=2):
+        super(VGG19, self).__init__()
+        self.features = self._make_layers([64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'])
+        self.classifier = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 4096),  # Adjust the input features to match your image size
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, num_classes),
+        )
 
+    def forward(self, x):
+        x = self.features(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
+
+    def _make_layers(self, cfg):
+        layers = []
+        in_channels = 1  # Change to 3 if you are dealing with RGB images
+        for x in cfg:
+            if x == 'M':
+                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            else:
+                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                           nn.BatchNorm2d(x),
+                           nn.ReLU(inplace=True)]
+                in_channels = x
+        return nn.Sequential(*layers)
 
 def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
-    """
-    Train a VGG19 model.
-
-    Parameters:
-    - model (torch.nn.Module): The VGG19 model to train
-    - train_loader (torch.utils.data.DataLoader): DataLoader for the training set
-    - test_loader (torch.utils.data.DataLoader): DataLoader for the test set
-    - criterion: Loss function
-    - optimizer: Optimizer
-    - epochs (int): Number of training epochs
-    """
     if torch.cuda.is_available():
         print('yes gpu')
     else:
         print('oh god cpu')
-    device = torch.device('cuda')# if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
-    print("Start:"+str(start_time))
+    model.train()
 
     for epoch in range(epochs):
-        model.train()
         running_loss = 0.0
-        for inputs, labels, name in train_loader:
+        for inputs, labels, _ in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -56,45 +65,32 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
         correct = 0
         total = 0
         with torch.no_grad():
-            for inputs, labels, name in test_loader:
+            for inputs, labels, _ in test_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
-                _, predicted = torch.max(outputs.data, 1)
+                _, predicted = torch.max(outputs, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-        print(f'Accuracy of the network on the test images: {100 * correct // total} %')
+
+        print(f'Accuracy of the network on the test images: {100 * correct / total} %')
     print('Finished Training')
 
-
 if __name__ == '__main__':
-    # Hyperparameters
-    num_classes = 2  # Two classes
+    num_classes = 2  # Update based on the number of classes in your dataset
     learning_rate = 0.001
-    batch_size = 8  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
+    batch_size = 8
     epochs = 25
 
-    # Transforms
-    transform = Compose([
-        Resize((100, 100)),  # Resize the image to 100x100
-        ToTensor(),
-        Normalize(mean=[0.5], std=[0.5])  # Normalize for a single channel
-    ])
-
-    # Datasets and DataLoaders
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/images/train')
-    train_loader = EndomicroscopyDataset.DataLoader(train_dataset, batch_size)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/images/test')
-    test_loader = EndomicroscopyDataset.DataLoader(test_dataset, batch_size)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-
-
-    # Model, Loss, and Optimizer
-    vgg19 = get_vgg19_model(pretrained=True, num_classes=num_classes)  # Set pretrained=False for training from scratch
+    vgg19 = VGG19(num_classes=num_classes)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
 
-    # Train the model
     start_time = time.time()
     train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
     end_time = time.time()
