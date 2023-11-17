@@ -31,6 +31,7 @@ class EndomicroscopyDataset(Dataset):
         img = torch.load(os.path.join(self.root, self.ls[idx]))
         image = img.image
         image = self.transform(image)
+        image = torch.concat((image, image, image), dim=0)
         return image, img.label, img.filename
 
     def __len__(self):

@@ -11,9 +11,15 @@ from EndomicroscopyImage import EndomicroscopyImage
 
 def get_vgg19_model(pretrained=True, num_classes=2):
     vgg19 = models.vgg19(pretrained=pretrained)
-    vgg19.features[0] = nn.Conv2d(1, 64, kernel_size=3, padding=1)
+    for i in vgg19.parameters():
+        i.requires_grad = False
     # Replace the classifier to match the number of classes
     vgg19.classifier[6] = nn.Linear(vgg19.classifier[6].in_features, num_classes)
+    # vgg19.classifier.add_module("7", nn.ReLU(inplace=True))
+    # vgg19.classifier.add_module("8", nn.Dropout(0.5))
+    # vgg19.classifier.add_module("9", nn.Linear(32, num_classes))
+    # vgg19.classifier.add_module("10", nn.Softmax())
+    print(vgg19)
     return vgg19
 
 
@@ -70,7 +76,7 @@ if __name__ == '__main__':
     # Hyperparameters
     num_classes = 2  # Two classes
     learning_rate = 0.001
-    batch_size = 8  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
+    batch_size = 64  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
     epochs = 25
 
     # Datasets and DataLoaders
