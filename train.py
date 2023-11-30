@@ -70,10 +70,10 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
 if __name__ == '__main__':
     # Hyperparameters
     num_classes = 2  # Two classes
-    learning_rate = 0.001
-    batch_size = 64  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
-    epochs = 25
-    dropout = 0.20 #Resnet dont have to set
+    learning_rate = 0.0001
+    batch_size = 64
+    epochs = 50
+    dropout = 0.20 # Resnet don‘t have to change
 
     # Datasets and DataLoaders
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/train/')
@@ -84,18 +84,18 @@ if __name__ == '__main__':
 
     # Model, Loss, and Optimizer
     ################### model ###########################
-    #vgg19 = vgg_pretrained.get_vgg19_model(pretrained=True, num_classes=num_classes, dropout=dropout)  # Set pretrained=False for training from scratch
-    resnet18 = ResNet.get_resnet18_model(pretrained=True, num_classes=num_classes)
-    # optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
-    optimizer = optim.Adam(resnet18.parameters(), lr=learning_rate)
+    vgg19 = vgg_pretrained.get_vgg19_model(pretrained=True, num_classes=num_classes, dropout=dropout)  # Set pretrained=False for training from scratch
+    #resnet18 = ResNet.get_resnet18_model(pretrained=True, num_classes=num_classes)
+    optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
+    #optimizer = optim.Adam(resnet18.parameters(), lr=learning_rate)
     ################### model ###########################
     criterion = nn.CrossEntropyLoss()
 
     # Train the model
     start_time = time.time()
     ################### model ###########################
-    #train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
-    train(resnet18, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    #train(resnet18, train_loader, test_loader, criterion, optimizer, epochs=epochs)
     ################### model ###########################
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
