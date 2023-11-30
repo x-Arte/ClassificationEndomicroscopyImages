@@ -1,3 +1,4 @@
+import pandas as pd
 import torch.nn as nn
 from torchvision import models
 import torch
@@ -9,14 +10,14 @@ import time
 import EndomicroscopyDataset
 from EndomicroscopyImage import EndomicroscopyImage
 
-def get_vgg19_model(pretrained=True, num_classes=2):
+def get_vgg19_model(pretrained=True, num_classes=2, dropout = 0.25):
     vgg19 = models.vgg19(pretrained=pretrained)
     for i in vgg19.parameters():
         i.requires_grad = False
     # Replace the classifier to match the number of classes
+    vgg19.classifier[5] = nn.Dropout(dropout)
     vgg19.classifier[6] = nn.Linear(vgg19.classifier[6].in_features, num_classes)
     # vgg19.classifier.add_module("7", nn.ReLU(inplace=True))
-    # vgg19.classifier.add_module("8", nn.Dropout(0.5))
     # vgg19.classifier.add_module("9", nn.Linear(32, num_classes))
     # vgg19.classifier.add_module("10", nn.Softmax())
     print(vgg19)
@@ -42,6 +43,7 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
     device = torch.device('cuda')# if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     print("Start:"+str(start_time))
+    tot_data = []
 
     for epoch in range(epochs):
         model.train()
@@ -68,16 +70,23 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
-        print(f'Accuracy of the network on the test images: {100 * correct // total} %')
-    print('Finished Training')
+        print(f'Accuracy of the network on the test images: {100 * correct / total} %')
+        tot_data.append([epoch,running_loss / len(train_loader), 100 * correct / total])
 
+    print('Finished Training')
+    print('Wait to save')
+
+    torch.save(model.state_dict(),'model/'+time.strftime('%Y-%m-%d-%H-%M', time.localtime())+'.pt')
+    df = pd.DataFrame(tot_data, columns=['epoch', 'training loss', 'accuracy'])
+    df.to_csv('model/acc/' + time.strftime('%Y-%m-%d-%H-%M', time.localtime())+'.csv')
 
 if __name__ == '__main__':
     # Hyperparameters
     num_classes = 2  # Two classes
-    learning_rate = 0.001
-    batch_size = 16  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
+    learning_rate = 0.0002
+    batch_size = 64  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
     epochs = 25
+    dropout = 0.20
 
     # Datasets and DataLoaders
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/train/')
@@ -87,7 +96,7 @@ if __name__ == '__main__':
     test_loader = EndomicroscopyDataset.DataLoader(test_dataset, batch_size)
 
     # Model, Loss, and Optimizer
-    vgg19 = get_vgg19_model(pretrained=True, num_classes=num_classes)  # Set pretrained=False for training from scratch
+    vgg19 = get_vgg19_model(pretrained=True, num_classes=num_classes, dropout=dropout)  # Set pretrained=False for training from scratch
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
 
@@ -96,3 +105,4 @@ if __name__ == '__main__':
     train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
+
