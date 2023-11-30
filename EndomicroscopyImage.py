@@ -26,7 +26,6 @@ def save_png(dicname, targetdic):
         raise NotADirectoryError
     cnt = 0
     for filename in os.listdir(dicname):
-
         cnt+=1
         data = torch.load(os.path.join(dicname, filename))
         image = data.image

@@ -76,14 +76,14 @@ if __name__ == '__main__':
     # Hyperparameters
     num_classes = 2  # Two classes
     learning_rate = 0.001
-    batch_size = 64  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
+    batch_size = 16  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
     epochs = 25
 
     # Datasets and DataLoaders
-    train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/images/train')
+    train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/train/')
     train_loader = EndomicroscopyDataset.DataLoader(train_dataset, batch_size)
 
-    test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/images/test')
+    test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/test/')
     test_loader = EndomicroscopyDataset.DataLoader(test_dataset, batch_size)
 
     # Model, Loss, and Optimizer

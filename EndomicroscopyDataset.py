@@ -36,3 +36,30 @@ class EndomicroscopyDataset(Dataset):
 
     def __len__(self):
         return len(self.ls)
+
+def set_label(path):
+    if not os.path.isdir(path):
+        raise NotADirectoryError
+    cnt = 0
+    cnt_1 = 0
+    for filename in os.listdir(path):
+        img = torch.load(path+filename)
+        label = -1
+        if filename.startswith('G') or filename.startswith('g'):
+            label = 0
+        elif filename.startswith('M') or filename.startswith('m'):
+            label = 1
+        img.label = label
+        cnt += 1
+        if label == -1:
+            cnt_1 += 1
+            print(cnt_1,filename)
+        img.save(path)
+    print(cnt)
+
+
+
+
+if __name__ == '__main__':
+    path = "dataset/test/"
+    set_label(path)
