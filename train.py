@@ -8,28 +8,15 @@ from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torch.utils.data import DataLoader
 import time
 import EndomicroscopyDataset
-from EndomicroscopyImage import EndomicroscopyImage
-
-def get_vgg19_model(pretrained=True, num_classes=2, dropout = 0.25):
-    vgg19 = models.vgg19(pretrained=pretrained)
-    for i in vgg19.parameters():
-        i.requires_grad = False
-    # Replace the classifier to match the number of classes
-    vgg19.classifier[5] = nn.Dropout(dropout)
-    vgg19.classifier[6] = nn.Linear(vgg19.classifier[6].in_features, num_classes)
-    # vgg19.classifier.add_module("7", nn.ReLU(inplace=True))
-    # vgg19.classifier.add_module("9", nn.Linear(32, num_classes))
-    # vgg19.classifier.add_module("10", nn.Softmax())
-    print(vgg19)
-    return vgg19
-
+import vgg_pretrained
+import ResNet
 
 def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
     """
-    Train a VGG19 model.
+    Train a model.
 
     Parameters:
-    - model (torch.nn.Module): The VGG19 model to train
+    - model (torch.nn.Module): The VGG19/ResNet18 model to train
     - train_loader (torch.utils.data.DataLoader): DataLoader for the training set
     - test_loader (torch.utils.data.DataLoader): DataLoader for the test set
     - criterion: Loss function
@@ -83,10 +70,10 @@ def train(model, train_loader, test_loader, criterion, optimizer, epochs=25):
 if __name__ == '__main__':
     # Hyperparameters
     num_classes = 2  # Two classes
-    learning_rate = 0.0002
+    learning_rate = 0.001
     batch_size = 64  # 16&64:orch.cuda.OutOfMemoryError: CUDA out of memory.
     epochs = 25
-    dropout = 0.20
+    dropout = 0.20 #Resnet dont have to set
 
     # Datasets and DataLoaders
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('dataset/train/')
@@ -96,13 +83,19 @@ if __name__ == '__main__':
     test_loader = EndomicroscopyDataset.DataLoader(test_dataset, batch_size)
 
     # Model, Loss, and Optimizer
-    vgg19 = get_vgg19_model(pretrained=True, num_classes=num_classes, dropout=dropout)  # Set pretrained=False for training from scratch
+    ################### model ###########################
+    #vgg19 = vgg_pretrained.get_vgg19_model(pretrained=True, num_classes=num_classes, dropout=dropout)  # Set pretrained=False for training from scratch
+    resnet18 = ResNet.get_resnet18_model(pretrained=True, num_classes=num_classes)
+    # optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(resnet18.parameters(), lr=learning_rate)
+    ################### model ###########################
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(vgg19.parameters(), lr=learning_rate)
 
     # Train the model
     start_time = time.time()
-    train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    ################### model ###########################
+    #train(vgg19, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    train(resnet18, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    ################### model ###########################
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
-
