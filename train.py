@@ -72,7 +72,7 @@ if __name__ == '__main__':
     num_classes = 2  # Two classes
     learning_rate = 0.0001
     batch_size = 64
-    epochs = 50
+    epochs = 80
     dropout = 0.20 # Resnet don‘t have to change
 
     # Datasets and DataLoaders
