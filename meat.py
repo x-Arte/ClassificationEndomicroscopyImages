@@ -9,7 +9,7 @@ import EndomicroscopyDataset
 from vgg_pretrained import get_vgg19_model
 from train import train
 
-def set_trained_model(modelpath, num_classes):
+def get_trained_model(modelpath, num_classes):
     model = get_vgg19_model()
     model.load_state_dict(torch.load(modelpath))
     for i in model.parameters():
@@ -51,7 +51,7 @@ def save_pt(path, label, outputpath):
 
 def transfer_train():
     modelpath = "model/2023-12-12-18-04.pt"
-    model = set_trained_model(modelpath, 3)
+    model = get_trained_model(modelpath, 3)
     # Hyperparameters
     num_classes = 3  # Two classes
     learning_rate = 0.0001
@@ -73,9 +73,10 @@ def transfer_train():
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
 
+
 if __name__ == "__main__":
     #save_pt("E:\OneDrive\IC\group project\\new_dataset_pcle (2)\\new_dataset_pcle\\pork\\train","pork","meat/dataset/train/")
-    #transfer_train()
+    transfer_train()
 
 
 

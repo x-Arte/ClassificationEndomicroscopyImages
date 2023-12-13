@@ -6,12 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 import torchvision.transforms as transforms
+
+from meat import get_trained_model
 from vgg_pretrained import get_vgg19_model
 from EndomicroscopyDataset import get_transform
 
 
 class SaveFeatures:
-    """ 用于提取目标层的特征及其梯度 """
+    """ get features & grad"""
 
 
     def __init__(self, module):
@@ -53,7 +55,7 @@ def grad_cam(model, feature_module, image_tensor, target_category):
     else:
         raise RuntimeError("Model output is not multi-class.")
 
-        # 检查是否捕获了梯度
+        # check if get the grad
     if sf.gradients is None:
         raise AttributeError("No gradients captured - backward hook not triggered.")
 
@@ -69,15 +71,14 @@ def grad_cam(model, feature_module, image_tensor, target_category):
 
     gradients = sf.gradients.cpu().data.numpy()[0]
     features = sf.features.cpu().data.numpy()[0]
-    # 计算每个通道的权重
+    # calculate weights
     weights = np.mean(gradients, axis=(1, 2))
-
-    # 加权求和特征图的每个通道
+    #
     cam = np.zeros(features.shape[1:], dtype=np.float32)  # 初始化CAM为零
     for i, w in enumerate(weights):
         cam += w * features[i, :, :]
 
-    # 应用ReLU（仅保留正激活）
+    # ReLU
     cam = np.maximum(cam, 0)
     cam = cam - np.min(cam)
     cam = cam / np.max(cam)
@@ -110,9 +111,11 @@ def visualize_cam(data_path, model, final_conv):
 
 if __name__ == "__main__":
     modelpath = "model/2023-12-12-18-04.pt"
-    data_path = 'dataset/test/Menngioma_476.pt'
-
+    ## replace ##
+    data_path = 'dataset/test/Glioblastoma ICG infiltrativ_66.pt'
     model = get_vgg19_model()
+    # meat
+    #model = get_trained_model("model/2023-12-12-18-04.pt", 3)
     model.load_state_dict(torch.load(modelpath))
     final_conv = model.features[34]
     for i in model.parameters():
