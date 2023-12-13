@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 from EndomicroscopyImage import EndomicroscopyImage
 
 class EndomicroscopyDataset(Dataset):
-    def __init__(self, path, transform='vgg',shuffle=False):
+    def __init__(self, path, transform_type='vgg',shuffle=False):
         super(EndomicroscopyDataset, self).__init__()
         if not os.path.isdir(path):
             raise NotADirectoryError
@@ -14,17 +14,11 @@ class EndomicroscopyDataset(Dataset):
         self.ls = os.listdir(path)
         if shuffle:
             random.shuffle(self.ls)
-        if transform == 'vgg':
-            self.transform = transforms.Compose([
-                #transforms.Grayscale(num_output_channels=3),  # gray to likeRGB
-                transforms.ToTensor(),
-                transforms.Resize((224, 224)),  # adjust the size
-                #transforms.Lambda(lambda x: x.repeat(3, 1, 1)),
-                transforms.Normalize(mean=[0.485], std=[0.229])
-            ])
+        if transform_type == 'vgg':
+            self.transform = get_transform(transform_type)
         #elif:
         else:
-            self.transform = transform
+            self.transform = None
 
 
     def __getitem__(self, idx):
@@ -36,7 +30,16 @@ class EndomicroscopyDataset(Dataset):
 
     def __len__(self):
         return len(self.ls)
-
+def get_transform(transform_type='vgg'):
+    if transform_type == 'vgg':
+        return transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((224, 224)),
+            transforms.Normalize(mean=[0.485], std=[0.229])
+        ])
+    else:
+        # 定义其他转换
+        pass
 def set_label(path):
     if not os.path.isdir(path):
         raise NotADirectoryError

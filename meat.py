@@ -9,7 +9,7 @@ import EndomicroscopyDataset
 from vgg_pretrained import get_vgg19_model
 from train import train
 
-def get_saved_model(modelpath,num_classes):
+def set_trained_model(modelpath, num_classes):
     model = get_vgg19_model()
     model.load_state_dict(torch.load(modelpath))
     for i in model.parameters():
@@ -24,7 +24,7 @@ def get_saved_model(modelpath,num_classes):
         model.classifier[5],
         nn.Linear(model.classifier[6].in_features, model.classifier[6].in_features),
         nn.ReLU(inplace=True),
-        nn.Dropout(p=0.25, inplace=False),
+        nn.Dropout(p=0.20, inplace=False),
         nn.Linear(model.classifier[6].out_features, num_classes)
     )
     model.classifier[9] = nn.Linear(model.classifier[6].out_features, num_classes)
@@ -49,16 +49,15 @@ def save_pt(path, label, outputpath):
         cnt += 1
     print(cnt)
 
-if __name__ == "__main__":
-    #save_pt("E:\OneDrive\IC\group project\\new_dataset_pcle (2)\\new_dataset_pcle\\pork\\train","pork","meat/dataset/train/")
-    modelpath = "model/2023-12-01-01-04.pt"
-    model = get_saved_model(modelpath,3)
+def transfer_train():
+    modelpath = "model/2023-12-12-18-04.pt"
+    model = set_trained_model(modelpath, 3)
     # Hyperparameters
     num_classes = 3  # Two classes
     learning_rate = 0.0001
     batch_size = 64
-    epochs = 75
-    dropout = 0.20  # Resnet don‘t have to change
+    epochs = 150
+    dropout = 0.20
 
     # Datasets and DataLoaders
     train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/train/')
@@ -70,6 +69,14 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
     # Train the model
     start_time = time.time()
-    train(model, train_loader, test_loader, criterion, optimizer, epochs=epochs)
+    train(model, train_loader, test_loader, criterion, optimizer, epochs=epochs, num_classes=num_classes)
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
+
+if __name__ == "__main__":
+    #save_pt("E:\OneDrive\IC\group project\\new_dataset_pcle (2)\\new_dataset_pcle\\pork\\train","pork","meat/dataset/train/")
+    #transfer_train()
+
+
+
+
