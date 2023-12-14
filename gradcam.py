@@ -112,7 +112,7 @@ def visualize_cam(data_path, model, final_conv):
 if __name__ == "__main__":
     modelpath = "model/2023-12-12-18-04.pt"
     ## replace ##
-    data_path = 'meat/dataset/test/pork1143_142.pt'
+    data_path = 'meat/dataset/test/ck1275_135.pt'
     # meat
     model = get_trained_model("model/2023-12-12-18-04.pt", 3, 64)
     model.load_state_dict(torch.load("meat/2023-12-13-16-44.pt"))

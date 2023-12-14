@@ -1,15 +1,14 @@
 import time
-
 import numpy as np
 import torch
 import os
-
 from torch import nn, optim
 import cv2
 from EndomicroscopyImage import EndomicroscopyImage
 import EndomicroscopyDataset
 from vgg_pretrained import get_vgg19_model
 from train import train
+from vgg_pretrained import classify
 
 def get_trained_model(modelpath, num_classes, num_features):
     model = get_vgg19_model()
@@ -72,20 +71,6 @@ def transfer_train():
     train(model, train_loader, test_loader, criterion, optimizer, epochs=epochs, num_classes=num_classes)
     end_time = time.time()
     print(f"Training time: {end_time - start_time}s")
-def save_features():
-    modelpath = "meat/2023-12-13-16-44.pt"
-    model = get_trained_model("model/2023-12-12-18-04.pt", 3, 64)
-    model.load_state_dict(torch.load(modelpath))
-    model.classifier = nn.Sequential(*list(model.classifier.children())[:7])
-
-    print(model)
-    train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/train/')
-    train_loader = EndomicroscopyDataset.DataLoader(train_dataset, 1)
-    extract_features(model, train_loader,"vgg_train.csv")
-
-    test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/test/')
-    test_loader = EndomicroscopyDataset.DataLoader(test_dataset, 1)
-    extract_features(model, test_loader,"vgg_test.csv")
 
 def extract_features(model,data_loader,save_name):
     model.eval()
@@ -112,11 +97,36 @@ def extract_features(model,data_loader,save_name):
     print(cnt)
     np.savetxt(save_name, combined_data, delimiter=",")
 
+def save_features():
+    modelpath = "meat/2023-12-13-16-44.pt"
+    model = get_trained_model("model/2023-12-12-18-04.pt", 3, 64)
+    model.load_state_dict(torch.load(modelpath))
+    model.classifier = nn.Sequential(*list(model.classifier.children())[:7])
+
+    print(model)
+    train_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/train/')
+    train_loader = EndomicroscopyDataset.DataLoader(train_dataset, 1)
+    extract_features(model, train_loader,"vgg_train.csv")
+
+    test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/test/')
+    test_loader = EndomicroscopyDataset.DataLoader(test_dataset, 1)
+    extract_features(model, test_loader,"vgg_test.csv")
+
+
 
 if __name__ == "__main__":
     #save_pt("E:\OneDrive\IC\group project\\new_dataset_pcle (2)\\new_dataset_pcle\\pork\\train","pork","meat/dataset/train/")
     #transfer_train()
-    save_features()
+    #save_features()
+    ###meat
+    modelpath = "meat/2023-12-13-16-44.pt"
+    model = get_trained_model("model/2023-12-12-18-04.pt", 3, 64)
+    model.load_state_dict(torch.load(modelpath))
+    test_dataset = EndomicroscopyDataset.EndomicroscopyDataset('meat/dataset/test/')
+    test_loader = EndomicroscopyDataset.DataLoader(test_dataset, 64)
+
+    ### ————————————————————————————————————————————————####
+    classify(model, test_loader)
 
 
 
